@@ -1,4 +1,6 @@
-const PlacesTemp = [
+const uuid = require('uuid/dist/v4');
+
+let PlacesTemp = [
     {
         id: '1',
         destination: 'Kraków',
@@ -63,16 +65,50 @@ exports.getTravelById = (req, res, next) => {
     res.json({ travel });
 };
 
-exports.getTravelByUserId = (res, req, next) => {
+exports.getTravelsByUserId = (res, req, next) => {
     userId = req.params.uid;
-    travel = PlacesTemp.find(p => {
+    travels = PlacesTemp.filter(p => {
         return p.creatorId === userId;
     });
 
-    if (!travel) {
+    if (!travels || travels.length === 0) {
         const error = new Error('Travel not found');
         error.code = 404;
         return next(error);
     }
-    res.json({ travel });
+    res.json({ travels });
+};
+
+exports.newTravel = (res, req, next) => {
+    const { destination, description, coordinates, creatorId } = req.body;
+    const createdTravel = {
+        id: uuid(),
+        destination,
+        description,
+        userId,
+        location: coordinates,
+        creatorId,
+        photos
+    };
+    PlacesTemp.push(createdTravel);
+
+    res.status(201).json({ travel: createdTravel });
+};
+
+exports.updateTravelById = (req, res, next) => {
+    const { destination, description } = req.body;
+    const placeId = req.params.pid;
+
+    const updatedTravel = PlacesTemp.find(p => {
+        p.id === placeId;
+        res.status(200).json({ travel: updatedTravel });
+    });
+};
+
+exports.deleteTravelById = (req, res, next) => {
+    const placeId = req.params.pid;
+    PlacesTemp = PlacesTemp.filter(p => {
+        p.id !== placeId;
+        res.status(200).json({ message: 'Place deleted' })
+    });
 };

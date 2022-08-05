@@ -6,6 +6,8 @@ const usersRoures = require('./routes/users');
 
 const app = express();
 
+app.use(bodyParser.json());
+
 app.use('/travels', travelsRoutes);
 app.use('/users', usersRoures);
 
