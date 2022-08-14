@@ -1,5 +1,6 @@
 const express = require('express');
 const bodyParser = require('body-parser');
+const mongoose = require('mongoose');
 
 const travelsRoutes = require('./routes/travels');
 const usersRoures = require('./routes/users');
@@ -8,8 +9,8 @@ const app = express();
 
 app.use(bodyParser.json());
 
-app.use('/travels', travelsRoutes);
-app.use('/users', usersRoures);
+app.use('/api/travels', travelsRoutes);
+app.use('/api/users', usersRoures);
 
 app.use((error, req, res, next) => {
     if (res.headerSend) {
@@ -19,4 +20,11 @@ app.use((error, req, res, next) => {
     res.json({ message: error.message || 'Unknown error' })
 });
 
-app.listen(5000);
+mongoose
+    .connect('mongodb+srv://grzesiek:grzesiek@cluster0.wcshf.mongodb.net/travelers?retryWrites=true&w=majority')
+    .then(() => {
+        app.listen(5000);
+    })
+    .catch(err => {
+        console.log(err);
+    });

@@ -7,7 +7,7 @@ const travelControllers = require('../controllers/travels');
 
 router.get('/:pid', travelControllers.getTravelById);
 
-router.get('/:uid', travelControllers.getTravelsByUserId);
+router.get('/user/:uid', travelControllers.getTravelsByUserId);
 
 router.post('/',
     [
@@ -20,8 +20,16 @@ router.post('/',
     travelControllers.newTravel
 );
 
-router.patch('/pid', travelControllers.updateTravelById);
+router.patch('/:pid',
+    [
+        check('destination')
+            .not()
+            .isEmpty(),
+        check('description')
+            .isLength({ min: 5 }),
+    ],
+    travelControllers.updateTravelById);
 
-router.delete('/pid', travelControllers.deleteTravelById);
+router.delete('/:pid', travelControllers.deleteTravelById);
 
 module.exports = router;

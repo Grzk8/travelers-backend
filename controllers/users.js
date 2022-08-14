@@ -1,4 +1,5 @@
 uuid = require('uuid/dist/v4');
+const {validationResult} = require('express-validator');
 
 const Users = [{
     id: '001',
@@ -14,6 +15,12 @@ exports.getUsers = (req, res, next) => {
 };
 
 exports.signup = (req, res, next) => {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+        const error = new Error('Invalid data, check your data');
+        error.code = 422;
+        return next(error);
+    }
     const { email, password } = req.body;
 
     const hasUser = Users.find(u => u.email === email);

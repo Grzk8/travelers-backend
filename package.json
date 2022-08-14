@@ -18,9 +18,11 @@
   },
   "homepage": "https://github.com/Grzk8/travelers-backend#readme",
   "dependencies": {
+    "axios": "^0.27.2",
     "body-parser": "^1.20.0",
     "express": "^4.18.1",
     "express-validator": "^6.14.2",
+    "mongoose": "^6.5.1",
     "uuid": "^8.3.2"
   },
   "devDependencies": {
