@@ -5,7 +5,7 @@ const Schema = mongoose.Schema;
 const travelSchema = new Schema({
     destination: { type: String, required: true },
     description: { type: String, required: true },
-    creator: { type: String, required: true },
+    creator: { type: mongoose.Types.ObjectId, required: true, ref: 'User' },
     photos: {
         photo1: { type: String, required: true },
         photo2: { type: String, required: true },

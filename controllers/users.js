@@ -1,51 +1,84 @@
 uuid = require('uuid/dist/v4');
-const {validationResult} = require('express-validator');
+const { validationResult } = require('express-validator');
 
-const Users = [{
-    id: '001',
-    firstName: 'Grzegorz',
-    lastName: 'Kaczor',
-    email: 'mail@mail.com',
-    password: '1234',
-    photo: 'https://media-exp1.licdn.com/dms/image/C4E35AQHWU9Dy4Qo5cA/profile-framedphoto-shrink_200_200/0/1603349375467?e=1659718800&v=beta&t=3N8kUVzXatAodLv0HXulRX65WLVb6HBT6DiUVVI-szo'
-}];
+const User = require('../models/users');
 
-exports.getUsers = (req, res, next) => {
-    res.json({ users: Users })
+const getUsers = async(req, res, next) => {
+    let users;
+    try {
+        users = await User.find({}, '-password');
+    } catch (err) {
+        const error = new Error('Fetching users faild');
+        error.code = 500;
+        return next(error);
+    }
+
+    res.json({ users: users.map(u => u.toObject({getters: true})) });
 };
 
-exports.signup = (req, res, next) => {
+const signup = async (req, res, next) => {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
         const error = new Error('Invalid data, check your data');
         error.code = 422;
         return next(error);
     }
-    const { email, password } = req.body;
+    const { firstName, lastName, email, password } = req.body;
 
-    const hasUser = Users.find(u => u.email === email);
+    let userExist;
+    try {
+        userExist = await User.findOne({ email: email });
+    } catch (err){
+        const error = new Error('Signing up faild');
+        error.code = 500;
+        return next(error);
+    }
 
-    if (hasUser) {
+    if (userExist) {
         const error = new Error('User email exists');
         error.code = 422;
         return next(error);
     }
-    const createUser = {
-        id: uuid(),
+    const createdUser = new User({
+        firstName,
+        lastName,
         email,
-        password
-    };
-    Users.push(createUser);
-    res.status(201).json({ user: createUser });
+        password,
+        travels: [],
+        photo: 'https://media-exp1.licdn.com/dms/image/C4E35AQHWU9Dy4Qo5cA/profile-framedphoto-shrink_200_200/0/1603349375467?e=1661101200&v=beta&t=hQRfpqKKsMOSt_qQAfv9BxggLcWxBw-uYk30ElZXMZI'
+    });
+
+    try {
+        await createdUser.save();
+    } catch (err) {
+        const error = new Error('Signing up failed');
+        error.code = 500;
+        return next(error);
+    }
+
+    res.status(201).json({ user: createdUser.toObject({ getters: true }) });
 };
 
-exports.login = (req, res, next) => {
+const login = async (req, res, next) => {
     const { email, password } = req.body;
-    const authUser = Users.find(u => u.email === email);
-    if (!authUser || authUser.password !== password) {
-        const error = new Error('User not found');
+    
+    let userExist;
+    try {
+        userExist = await User.findOne({ email: email });
+    } catch (err){
+        const error = new Error('Logging in faild');
+        error.code = 500;
+        return next(error);
+    }
+
+    if (!userExist || userExist.password !== password) {
+        const error = new Error('Invalid email or password');
         error.code = 401;
         return next(error);
     }
     res.json({ message: 'logged in' });
 };
+
+exports.getUsers = getUsers;
+exports.signup = signup;
+exports.login = login;
