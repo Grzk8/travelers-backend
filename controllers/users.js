@@ -3,7 +3,7 @@ const { validationResult } = require('express-validator');
 
 const User = require('../models/users');
 
-const getUsers = async(req, res, next) => {
+const getUsers = async (req, res, next) => {
     let users;
     try {
         users = await User.find({}, '-password');
@@ -13,7 +13,7 @@ const getUsers = async(req, res, next) => {
         return next(error);
     }
 
-    res.json({ users: users.map(u => u.toObject({getters: true})) });
+    res.json({ users: users.map(u => u.toObject({ getters: true })) });
 };
 
 const signup = async (req, res, next) => {
@@ -28,7 +28,7 @@ const signup = async (req, res, next) => {
     let userExist;
     try {
         userExist = await User.findOne({ email: email });
-    } catch (err){
+    } catch (err) {
         const error = new Error('Signing up faild');
         error.code = 500;
         return next(error);
@@ -61,11 +61,11 @@ const signup = async (req, res, next) => {
 
 const login = async (req, res, next) => {
     const { email, password } = req.body;
-    
+
     let userExist;
     try {
         userExist = await User.findOne({ email: email });
-    } catch (err){
+    } catch (err) {
         const error = new Error('Logging in faild');
         error.code = 500;
         return next(error);

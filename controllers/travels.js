@@ -6,7 +6,6 @@ const Travel = require('../models/travel');
 const User = require('../models/users');
 
 
-
 const getTravelById = async (req, res, next) => {
     const placeId = req.params.pid;
     let travel;
@@ -139,15 +138,26 @@ const deleteTravelById = async (req, res, next) => {
     let travel;
 
     try {
-        travel = await Travel.findById(placeId);
+        travel = await Travel.findById(placeId).populate('creator');
     } catch (err) {
         const error = new Error('Deleting travel failed');
         error.code = 500;
         return next(error);
     }
 
+    if (!travel) {
+        const error = new Error('No travel for this id');
+        error.code = 404;
+        return next(error);
+    }
+
     try {
-        await travel.remove();
+        const sess = await mongoose.startSession();
+        sess.startTransaction();
+        await travel.remove({ session: sess });
+        travel.creator.travels.pull(travel);
+        await travel.creator.save({ session: sess });
+        await sess.commitTransaction();
     } catch {
         const error = new Error('Deleting travel failed');
         error.code = 500;
