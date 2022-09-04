@@ -23,7 +23,7 @@ const signup = async (req, res, next) => {
         error.code = 422;
         return next(error);
     }
-    const { firstName, lastName, email, password } = req.body;
+    const { fullName, email, password } = req.body;
 
     let userExist;
     try {
@@ -40,8 +40,7 @@ const signup = async (req, res, next) => {
         return next(error);
     }
     const createdUser = new User({
-        firstName,
-        lastName,
+        fullName,
         email,
         password,
         travels: [],
@@ -76,7 +75,10 @@ const login = async (req, res, next) => {
         error.code = 401;
         return next(error);
     }
-    res.json({ message: 'logged in' });
+    res.json({
+        message: 'logged in',
+        user: userExist.toObject({ getters: true })
+    });
 };
 
 exports.getUsers = getUsers;

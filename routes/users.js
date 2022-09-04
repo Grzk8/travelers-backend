@@ -11,10 +11,7 @@ router.post('/login', usersControllers.login);
 
 router.post('/signup',
     [
-        check('firstName')
-            .not()
-            .isEmpty(),
-        check('lastName')
+        check('fullName')
             .not()
             .isEmpty(),
         check('email')
